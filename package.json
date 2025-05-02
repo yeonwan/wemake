@@ -3,12 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
-    "dev": "react-router dev",
+    "dev": "vite",
+    "build:spa": "BUILD_TARGET=spa vite build",
+    "build:ssr": "react-router build",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build/client"
+    "predeploy": "npm run build:ssr",
+    "deploy:spa": "npm run build:spa && gh-pages -d dist"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.4",
