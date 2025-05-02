@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy SPA to GitHub Pages
 
 on:
   push:
@@ -24,11 +24,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build
-        run: npm run build
+      - name: Build SPA
+        run: npm run build:spa
 
-      - name: Deploy
+      - name: Deploy SPA
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build/client
+          folder: dist
           branch: gh-pages 
