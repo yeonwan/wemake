@@ -23,7 +23,7 @@ export const  loader = () => {
 export default function HomePage({ loaderData} : Route.ComponentProps) {
     return (
         <div className="px-20 space-y-40">
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <div>
                     <h2 className="text-4xl font-bold leading-tight tracking-tight">Today's Products</h2>
                     <p className="text-lg font-light text-foreground">
@@ -46,7 +46,7 @@ export default function HomePage({ loaderData} : Route.ComponentProps) {
                     />
                 ))}
             </div>
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <div>
                     <h2 className="text-4xl font-bold leading-tight tracking-tight">Latest Discussions</h2>
                     <p className="text-lg font-light text-foreground">
@@ -67,7 +67,7 @@ export default function HomePage({ loaderData} : Route.ComponentProps) {
                     />
                 ))}
             </div>
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <div>
                     <h2 className="text-4xl font-bold leading-tight tracking-tight">IdeasGPT</h2>
                     <p className="text-lg font-light text-foreground">
@@ -88,7 +88,7 @@ export default function HomePage({ loaderData} : Route.ComponentProps) {
                     />
                 ))}
             </div>
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <div>
                     <h2 className="text-4xl font-bold leading-tight tracking-tight">Latest Jobs</h2>
                     <p className="text-lg font-light text-foreground">
@@ -112,7 +112,7 @@ export default function HomePage({ loaderData} : Route.ComponentProps) {
                     />
                 ))}
             </div>
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <div>
                     <h2 className="text-4xl font-bold leading-tight tracking-tight">Find a team mate</h2>
                     <p className="text-lg font-light text-foreground">

@@ -30,7 +30,7 @@ export function PostCard({
     <Link to={`/community/${id}`} className="block">
       <Card className={cn("bg-transparent hover:bg-card/50 transition-colors", 
         expanded ? "flex flex-row items-center justify-between" : "")}>
-        <CardHeader className="flex flex-row items-center gap-3">
+        <CardHeader className="flex items-center gap-3">
           <Avatar className="size-14">
             {avatarUrl ? (
               <AvatarImage src={avatarUrl} />
@@ -38,13 +38,13 @@ export function PostCard({
               <AvatarFallback>{author[0]}</AvatarFallback>
             )}
           </Avatar>
-          <div className="space-y-2">
-            <CardTitle className="text-xl font-semibold leading-none tracking-tight whitespace-nowrap">{title}</CardTitle>
-            <div className="flex flex-row gap-1 text-sm leading-tight text-muted-foreground whitespace-nowrap">
-              <span>{author}</span>
-              <span>{category}</span>
+          <div className="space-y-2 w-0 flex-1 min-w-0">
+            <CardTitle className="text-xl font-semibold leading-none tracking-tight line-clamp-2">{title}</CardTitle>
+            <div className="flex flex-row gap-1 text-sm leading-tight text-muted-foreground line-clamp-2">
+              <span className="">{author}</span>
+              <span className="">{category}</span>
               <DotIcon className="size-4" />
-              <span>{postedAt}</span>
+              <span className="">{postedAt}</span>
             </div>
           </div>
         </CardHeader>
