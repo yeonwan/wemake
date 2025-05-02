@@ -1,88 +1,124 @@
-# Welcome to React Router!
+# WeMake Dashboard
 
-A modern, production-ready template for building full-stack React applications using React Router.
+<div align="center">
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+![WeMake Dashboard](https://img.shields.io/badge/WeMake-Dashboard-blue)
+![React Router](https://img.shields.io/badge/React_Router-6.22.1-orange)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue)
+![Shadcn UI](https://img.shields.io/badge/Shadcn_UI-0.0.1-black)
+![Supabase](https://img.shields.io/badge/Supabase-2.39.3-green)
 
-## Features
+</div>
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## 🚀 Overview
 
-## Getting Started
+WeMake Dashboard is a modern, responsive dashboard application built with React Router and TypeScript. It provides a beautiful and intuitive interface for monitoring and analyzing data with real-time updates.
+
+## ✨ Features
+
+- 📊 Interactive Charts and Analytics
+- 🎨 Modern UI with Shadcn UI Components
+- 🌙 Dark/Light Mode Support
+- 📱 Responsive Design
+- 🔒 Secure Authentication with Supabase
+- ⚡ Real-time Data Updates
+
+## 🛠️ Tech Stack
+
+- **Frontend Framework:** React Router
+- **Language:** TypeScript
+- **UI Components:** Shadcn UI
+- **Styling:** Tailwind CSS
+- **Backend:** Supabase
+- **Charts:** Recharts
+- **Icons:** Lucide Icons
+
+## 🏗️ Project Structure
+
+```
+app/
+├── common/
+│   ├── components/
+│   │   ├── ui/          # Shadcn UI components
+│   │   └── magic/       # Magic UI components
+│   ├── lib/            # Utility functions
+│   └── hooks/          # Custom hooks
+├── features/
+│   └── users/
+│       └── pages/      # Dashboard pages
+└── app.css            # Global styles
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- Supabase account
 
 ### Installation
 
-Install the dependencies:
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/wemake.git
+cd wemake
+```
 
+2. Install dependencies
 ```bash
 npm install
+# or
+yarn install
 ```
 
-### Development
+3. Set up environment variables
+```bash
+cp .env.example .env
+```
+Fill in your Supabase credentials in the `.env` file.
 
-Start the development server with HMR:
-
+4. Start the development server
 ```bash
 npm run dev
+# or
+yarn dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+## 🎨 UI Components
 
-## Building for Production
+The project uses Shadcn UI components for a consistent and beautiful design:
 
-Create a production build:
+- Cards
+- Charts
+- Navigation
+- Forms
+- Modals
+- And more...
 
-```bash
-npm run build
-```
+## 📊 Dashboard Features
 
-## Deployment
+- **Performance Metrics**
+  - Real-time data visualization
+  - Interactive charts
+  - Custom tooltips
 
-### Docker Deployment
+- **User Analytics**
+  - Profile views tracking
+  - Visitor statistics
+  - Trend analysis
 
-To build and run using Docker:
+## 🤝 Contributing
 
-```bash
-docker build -t my-app .
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-# Run the container
-docker run -p 3000:3000 my-app
-```
+## 📝 License
 
-The containerized application can be deployed to any platform that supports Docker, including:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+## 🙏 Acknowledgments
 
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
-# wemake
+- [Shadcn UI](https://ui.shadcn.com/)
+- [React Router](https://reactrouter.com/)
+- [Supabase](https://supabase.com/)
+- [Recharts](https://recharts.org/)
