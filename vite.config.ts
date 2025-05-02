@@ -5,5 +5,5 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
-  base: "/wemake/", // GitHub Pages base URL
+  base: process.env.NODE_ENV === 'production' ? '/wemake/' : '/',
 });
