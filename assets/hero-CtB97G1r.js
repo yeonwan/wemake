@@ -1,0 +1,1 @@
+import{j as e}from"./jsx-runtime-CEMuh2-_.js";function s({title:t,description:r}){return e.jsxs("div",{className:"flex flex-col justify-center items-center rounded-md bg-gradient-to-t from-background to-primary/10 py-20",children:[e.jsx("h1",{className:"text-5xl font-bold",children:t}),e.jsx("p",{className:"text-2xl font-light text-foreground",children:r})]})}export{s as H};

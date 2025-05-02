@@ -1,0 +1,1 @@
+import{w as t}from"./with-props-1xZZRI6v.js";import"./index-l2PZgWEW.js";import"./chunk-KNED5TY2-DZTTZ0eu.js";function i(){return[{title:"Product | WeMake"},{name:"description",content:"Product details and information"}]}const a=t(function(){return null});export{a as default,i as meta};
