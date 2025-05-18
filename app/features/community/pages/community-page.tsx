@@ -85,7 +85,7 @@ export default function CommunityPage() {
                 id={`postId-${index}`}
                 title={`What is best tool for ${index}?`}
                 author="Yeonwan"
-                avatarUrl="https://github.com/apple.png"
+                avatarUrl="https://github.com/yeonwan.png"
                 category="Productivity"
                 postedAt="12 hours ago"
                 upvotes={120}

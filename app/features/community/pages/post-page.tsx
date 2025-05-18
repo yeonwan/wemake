@@ -85,7 +85,7 @@ export default function PostPage() {
                   avatarUrl="https://github.com/yeonwan.png"
                   content="I'm looking for a productivity tool that can help me get more done. I've tried a lot of them, but I'm still not sure which one is the best."
                   postedAt="12 hours ago"
-                  topLevel  
+                  topLevel 
                 />
               </div>
             </div>
