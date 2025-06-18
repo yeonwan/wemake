@@ -1,5 +1,8 @@
 import type { MetaFunction } from "react-router";
 import { PostCard } from "~/features/community/components/post-card";
+import { getUserPosts } from "../queries";
+import type { Route } from "./+types/profile-posts-page";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: MetaFunction = () => {
   return [
@@ -8,17 +11,24 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function ProfilePostsPage() {
+export const loader = async ({params, request}: Route.LoaderArgs) => {
+  const {client, headers} = makeSSRClient(request);
+  const posts = await getUserPosts(client, { username: params.username });
+  return { posts };
+};
+
+export default function ProfilePostsPage({loaderData} : Route.ComponentProps) {
+  const {posts} = loaderData;
   return (
     <div className="flex flex-col gap-5">
-      {Array.from({ length: 11 }).map((_, index) => (
+      {posts.map((post) => (
         <PostCard
-          id={`postId-${index}`}
-          title={`What is best tool for ${index}?`}
-          author="Yeonwan"
-          avatarUrl="https://github.com/apple.png"
-          category="Productivity"
-          postedAt="12 hours ago"
+          id={post.post_id.toString()}
+          title={post.title}
+          author={post.author}
+          avatarUrl={post.author_avatar}
+          category={post.topic}
+          postedAt={post.created_at}
           expanded
         />
       ))}

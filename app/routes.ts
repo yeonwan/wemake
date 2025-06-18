@@ -4,17 +4,19 @@ export default [
   index("common/pages/home.tsx"),
   ...prefix("products", [
     index("features/products/pages/products-page.tsx"),
-    ...prefix("leaderboards", [
-      index("features/products/pages/leaderboard-page.tsx"),
-      route("yearly/:year", "features/products/pages/yearly-leaderboard-page.tsx"),
-      route("monthly/:year/:month", "features/products/pages/monthly-leaderboard-page.tsx"),
-      route("weekly/:year/:week", "features/products/pages/weekly-leaderboard-page.tsx"),
-      route("daily/:year/:month/:day", "features/products/pages/daily-leaderboard-page.tsx"),
-      route("/:period", "features/products/pages/leaderboards-redirection-page.tsx"),
+    layout("features/products/layouts/leaderboard-layout.tsx", [
+      ...prefix("leaderboards", [
+        index("features/products/pages/leaderboard-page.tsx"),
+        route("yearly/:year", "features/products/pages/yearly-leaderboard-page.tsx"),
+        route("monthly/:year/:month", "features/products/pages/monthly-leaderboard-page.tsx"),
+        route("weekly/:year/:week", "features/products/pages/weekly-leaderboard-page.tsx"),
+        route("daily/:year/:month/:day", "features/products/pages/daily-leaderboard-page.tsx"),
+        route("/:period", "features/products/pages/leaderboards-redirection-page.tsx"),
+      ]),
     ]),
     ...prefix("categories", [
       index("features/products/pages/categories-page.tsx"),
-      route("/:category", "features/products/pages/category-page.tsx"),
+      route("/:categoryId", "features/products/pages/category-page.tsx"),
     ]),
     route("/search", "features/products/pages/search-page.tsx"),
     route("/submit", "features/products/pages/submit-product-page.tsx"),
@@ -28,6 +30,7 @@ export default [
           // route("/new", "features/products/pages/product-new-review-page.tsx"),
         ]),
       ]),
+      route("/visit", "features/products/pages/product-visit-page.tsx"),
     ])
   ]),
   ...prefix("/ideas", [
@@ -43,6 +46,7 @@ export default [
     layout("features/auth/layouts/auth-layout.tsx", [
       route("/join", "features/auth/pages/join-page.tsx"),
       route("/login", "features/auth/pages/login-page.tsx"),
+      route("/logout", "features/auth/pages/logout-page.tsx"),
       ...prefix("/otp", [
         route("/start", "features/auth/pages/otp-start-page.tsx"),
         route("/complete", "features/auth/pages/otp-complete-page.tsx"),
@@ -56,7 +60,7 @@ export default [
   ...prefix("/community", [
     index("features/community/pages/community-page.tsx"),
     route("/:postId", "features/community/pages/post-page.tsx"),
-    route("/submit", "features/community/pages/submit-post-page.tsx"),
+    route("/create", "features/community/pages/submit-post-page.tsx"),
   ]),
   ...prefix("/teams", [
     index("features/teams/pages/teams-page.tsx"),
@@ -83,8 +87,8 @@ export default [
     route("/settings", "features/users/pages/settings-page.tsx"),
     route("/notifications", "features/users/pages/notifications-page.tsx"),
   ]),
-  layout("features/users/layouts/profile-layout.tsx", [
-    ...prefix("/users/:username", [
+  ...prefix("/users/:username", [
+    layout("features/users/layouts/profile-layout.tsx", [
       index("features/users/pages/profile-page.tsx"),
       route("/products", "features/users/pages/profile-products-page.tsx"),
       route("/posts", "features/users/pages/profile-posts-page.tsx"),

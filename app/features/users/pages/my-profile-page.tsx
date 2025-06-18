@@ -1,12 +1,18 @@
 import { redirect, type MetaFunction } from "react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "~/common/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "~/common/components/ui/avatar";
-import { Button } from "~/common/components/ui/button";
-import { InputPair } from "~/common/components/input-pair";
+import { makeSSRClient } from "~/supa-client";
+import { getUserById } from "../queries";
+import type { Route } from "./+types/my-profile-page";
 
-export const loader = async () => {
-  // TODO: Find user using the cookie
-  return redirect("/users/yeonwan");
+
+export const loader = async ({request}: Route.LoaderArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const { data: { user } } = await client.auth.getUser();
+  if (!user) {
+    return redirect("/auth/login");
+  }
+  const profile = await getUserById(client, { profileId: user.id });
+  const encodedUsername = encodeURIComponent(profile.username);
+  return redirect(`/users/${encodedUsername}`);
 };
 
 export const meta: MetaFunction = () => {

@@ -6,12 +6,16 @@ import { Hero } from "~/common/components/hero";
 import { ProductCard } from "../components/product-card";
 import { Button } from "~/common/components/ui/button";
 import { ProductPagination } from "~/common/components/product-pagination";
+import { getProductsByDateRange, getProductsPagesByDateRange } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 const paramsSchema = z.object({
   year: z.string().transform((val) => parseInt(val)),
   month: z.string().transform((val) => parseInt(val)),
   day: z.string().transform((val) => parseInt(val)),
 });
+
+
 
 export const meta: Route.MetaFunction = ({ params }) => {
   const data = DateTime.fromObject({
@@ -23,9 +27,10 @@ export const meta: Route.MetaFunction = ({ params }) => {
     { title: `The best of ${data.toLocaleString(DateTime.DATE_MED)} | Wemake` },
   ];
 };
- 
 
-export const loader = ({ params }: Route.LoaderArgs) => {
+
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+  const {client, headers} = makeSSRClient(request);
   const { success, data } = paramsSchema.safeParse(params);
 
   if (!success) {
@@ -35,18 +40,36 @@ export const loader = ({ params }: Route.LoaderArgs) => {
   const date = DateTime.fromObject(parsedDate);
   if (!date.isValid) {
     throw new Error("Invalid date");
-    //throw data(null, { status: 400 });
   }
 
-  return parsedDate;
+  const today = DateTime.now().setZone("Pacific/Canada");
+  if (date > today) {
+    throw new Error(`This date is in the future`);
+  }
 
+  const url = new URL(request.url);
+
+  const products = await getProductsByDateRange(client, {
+    startDate: date.startOf("day"),
+    endDate: date.endOf("day"),
+    limit: 15,
+    page: url.searchParams.get("page") ? parseInt(url.searchParams.get("page")!) : 1,
+  });
+
+  const totalPages = await getProductsPagesByDateRange(client, {
+    startDate: date.startOf("day"),
+    endDate: date.endOf("day"),
+  });
+
+  return { parsedDate, products, totalPages };
 }
 
 export default function DailyLeaderboardPage({ loaderData }: Route.ComponentProps) {
+  const { parsedDate, products } = loaderData;
   const urlDate = DateTime.fromObject({
-    year: loaderData.year,
-    month: loaderData.month,
-    day: loaderData.day,
+    year: parsedDate.year,
+    month: parsedDate.month,
+    day: parsedDate.day,
   });
 
   const previousDate = urlDate.minus({ days: 1 });
@@ -70,19 +93,19 @@ export default function DailyLeaderboardPage({ loaderData }: Route.ComponentProp
       </div>
 
       <div className="space-y-5 w-full max-w-screen-md mx-auto py-5">
-        {Array.from({ length: 10 }).map((_, index) => (
+        {products.map((product, index) => (
           <ProductCard
-            key={index}
-            id={`productId-${index}`}
-            name={`Product Name ${index}`}
-            description={`Product Description ${index}`}
-          commentsCount={12}
-          viewsCount={34}
-            upvotes={120}
+            key={product.product_id}
+            id={product.product_id.toString()}
+            name={product.name}
+            description={product.tagline}
+            commentsCount={Number(product.reviews)}
+            viewsCount={Number(product.views)}
+            upvotes={Number(product.upvotes)}
           />
         ))}
       </div>
-      <ProductPagination totalPages={10} />
+      <ProductPagination totalPages={loaderData.totalPages} />
     </div>
   );
 } 

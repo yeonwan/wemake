@@ -3,6 +3,7 @@ import { Button } from "~/common/components/ui/button";
 import { Link } from "react-router";
 import { DotIcon, EyeIcon, HeartIcon, LockIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { DateTime } from "luxon";
 
 interface IdeaCardProps {
   id: string;
@@ -39,7 +40,7 @@ export function IdeaCard({
           </div>
           <div className="flex items-center gap-1">
             <DotIcon className="size-4" />
-            <span>{timeAgo}</span>
+            <span>{DateTime.fromISO(timeAgo).toRelative()}</span>
           </div>
         </CardContent>
 

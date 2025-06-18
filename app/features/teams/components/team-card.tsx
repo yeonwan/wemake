@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardFooter } from "~/common/components/ui/
 interface TeamCardProps {
     id: string;
     leaderUsername: string;
-    leaderAvatarUrl: string;
+    leaderAvatarUrl: string | null;
     positions: string[];
     projectDescription: string;
 }
@@ -20,16 +20,21 @@ export function TeamCard({
     projectDescription,
 }: TeamCardProps) {
     return (
-        <Link to={`/teams/${id}`}>
-            <Card className="bg-transparent hover:bg-card/50 transition-colors">
+        <Link to={`/teams/${id}`} className="block">
+            <Card className="bg-transparent hover:bg-card/50 transition-colors h-full flex flex-col justify-between">
                 <CardHeader className="flex flex-row items-center">
                     <CardTitle className="text-base leading-loose">
                         <Badge variant="secondary" className="inline-flex shadow-sm items-center">
                             @{leaderUsername}
-                            <Avatar>
-                                <AvatarFallback>N</AvatarFallback>
-                                <AvatarImage src={leaderAvatarUrl} />
-                            </Avatar>
+                            {leaderAvatarUrl ? (
+                                <Avatar>
+                                    <AvatarImage src={leaderAvatarUrl} />
+                                </Avatar>
+                            ) : (
+                                <Avatar>
+                                    <AvatarFallback>N</AvatarFallback>
+                                </Avatar>
+                            )}
                         </Badge>
                         <span className="text-sm"> is looking for </span>
                         {positions.map((position, index) => (

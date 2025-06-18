@@ -5,6 +5,10 @@ import { ProductCard } from "../components/product-card";
 import { Form } from "react-router";
 import { Input } from "~/common/components/ui/input";
 import { Button } from "~/common/components/ui/button";
+import { getProductsBySearch, getProductsPagesBySearch } from "../queries";
+import { ProductPagination } from "~/common/components/product-pagination";
+import { makeSSRClient } from "~/supa-client";
+
 interface SearchPageProps extends Route.ComponentProps { }
 
 const paramsSchema = z.object({
@@ -12,7 +16,8 @@ const paramsSchema = z.object({
   page: z.number().optional().default(1),
 });
 
-export function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
+  const {client, headers} = makeSSRClient(request);
   const url = new URL(request.url);
   const { success, data } = paramsSchema.safeParse(Object.fromEntries(url.searchParams));
 
@@ -20,11 +25,14 @@ export function loader({ request }: Route.LoaderArgs) {
     throw new Error("Invalid params");
   }
   const parsedData = { query: data.query, page: data.page };
-
-  return {
-    query: parsedData.query,
-    page: parsedData.page,
-  };
+  if (parsedData.query === "") {
+    return { products: [], totalPages: 1 };
+  }
+  const [products, totalPages] = await Promise.all([
+    getProductsBySearch(client, { query: parsedData.query, page: parsedData.page }),
+    getProductsPagesBySearch(client, { query: parsedData.query })
+  ]);
+  return { products, totalPages };
 }
 
 export const meta: Route.MetaFunction = () => {
@@ -34,7 +42,7 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function SearchPage({ loaderData }: SearchPageProps) {
+export default function SearchPage({ loaderData }: Route.ComponentProps) {
   return (
     <div className="container py-8">
       <Hero
@@ -48,18 +56,19 @@ export default function SearchPage({ loaderData }: SearchPageProps) {
       </Form>
 
       <div className="py-20 grid grid-cols-3 gap-5">
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.products.map((product) => (
           <ProductCard
-            key={`monthly-${index}`}
-            id={`monthly-${index}`}
-            name={`Product Name ${index}`}
-            description={`Product Description ${index}`}
-            commentsCount={48}
-            viewsCount={136}
-            upvotes={480}
+            key={product.product_id}
+            id={product.product_id.toString()}
+            name={product.name}
+            description={product.tagline}
+            commentsCount={Number(product.reviews)}
+            viewsCount={Number(product.views)}
+            upvotes={Number(product.upvotes)}
           />
         ))}
       </div>
+      <ProductPagination totalPages={loaderData.totalPages} />
     </div>
   );
 } 

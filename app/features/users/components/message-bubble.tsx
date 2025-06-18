@@ -19,7 +19,8 @@ export function MessageBubble({
         <AvatarFallback>{avatarFallback}</AvatarFallback>
       </Avatar>
       <div className={cn("text-sm rounded-md p-4 w-1/3",
-        !isCurrentUser && "bg-primary/20", isCurrentUser && "bg-accent rounded-br-none")}>
+        !isCurrentUser && "bg-primary/20", 
+        isCurrentUser && "bg-accent rounded-br-none")}>
         <p>{message}</p>
       </div>
     </div>

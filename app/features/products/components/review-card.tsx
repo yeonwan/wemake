@@ -1,5 +1,8 @@
 import { Star as StarIcon } from "lucide-react";
+import { DateTime } from "luxon";
 import { Avatar, AvatarFallback, AvatarImage } from "~/common/components/ui/avatar";
+import { Card, CardContent } from "~/common/components/ui/card";
+import { cn } from "~/lib/utils";
 
 interface ReviewCardProps {
   id: string;
@@ -13,45 +16,48 @@ interface ReviewCardProps {
 
 export function ReviewCard({ id, username, avatarUrl, postedAt, content, rating, onRatingChange }: ReviewCardProps) {
   return (
-    <div className="flex flex-col gap-2 mt-10">
-      <div className="flex flex-row items-center gap-2">
-        <Avatar>
-          <AvatarImage src={avatarUrl} />
-          <AvatarFallback>
-            {username.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <h4 className="text-lg font-bold">{username}</h4>
-          <p className="text-sm text-muted-foreground">{postedAt}</p>
-        </div>
-      </div>
-      <div className="flex flex-row items-center text-yellow-400">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <StarIcon
-            key={index}
-            className="w-5 h-5 cursor-pointer"
-            onClick={() => onRatingChange(id, index + 1)}
-            fill={index < rating ? "currentColor" : "none"}
-          />
-        ))}
-      </div>
-      <p className="text-muted-foreground">{content}</p>
-      <span className="text-muted-foreground text-sm">
-        {(() => {
-          const reviewDate = new Date(postedAt);
-          const now = new Date();
-          const diffTime = Math.abs(now.getTime() - reviewDate.getTime());
-          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          const diffMonths = Math.floor(diffDays / 30);
-          const diffYears = Math.floor(diffDays / 365);
+    <Card className="w-full transition-all duration-200 hover:shadow-md">
+      <CardContent className="pt-1">
+        <div className="flex flex-col gap-4">
+          {/* Header: Avatar, Username, and Date */}
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <Avatar className="border-2 border-primary/10">
+                <AvatarImage src={avatarUrl} />
+                <AvatarFallback className="bg-primary/5">
+                  {username.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <h4 className="font-semibold tracking-tight">{username}</h4>
+                <time className="text-sm text-muted-foreground">
+                  {DateTime.fromISO(postedAt).toRelative()}
+                </time>
+              </div>
+            </div>
+            
+            {/* Rating Stars */}
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <StarIcon
+                  key={index}
+                  className={cn(
+                    "w-5 h-5 transition-all duration-200 cursor-pointer hover:scale-110",
+                    index < rating ? "text-yellow-400" : "text-muted-foreground/25"
+                  )}
+                  onClick={() => onRatingChange(id, index + 1)}
+                  fill={index < rating ? "currentColor" : "none"}
+                />
+              ))}
+            </div>
+          </div>
 
-          if (diffYears > 0) return `${diffYears} year${diffYears > 1 ? 's' : ''} ago`;
-          if (diffMonths > 0) return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
-          if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-          return 'Today';
-        })()}
-      </span>
-    </div>
+          {/* Review Content */}
+          <div className="pl-3 ">
+            <p className="text-card-foreground leading-relaxed">{content}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 } 

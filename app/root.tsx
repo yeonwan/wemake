@@ -6,11 +6,15 @@ import {
   Scripts,
   ScrollRestoration,
   useLocation,
+  useNavigation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import stylesheet from "./app.css?url";
 import { Navigation } from "./common/components/navigation";
+import { cn } from "./lib/utils";
+import { makeSSRClient } from "./supa-client";
+import { getUserById } from "./features/users/queries";
 
 
 console.log(stylesheet, "hi");
@@ -47,17 +51,44 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+export async function loader({ request }: Route.LoaderArgs) {
+  const {client, headers} = makeSSRClient(request);
+  const { data: { user }, } = await client.auth.getUser();
+  if(user) {
+    const profile = await getUserById(client, { profileId: user.id });  
+    return { user, profile };
+  }
+  return { user: null, profile: null };
+}
+
+export default function App({loaderData}: Route.ComponentProps) {
   const { pathname } = useLocation();
+  const navigate = useNavigation();
+  const isLoading = navigate.state === "loading";
+  const isLoggedIn = loaderData.user !==null;
+  const profile = loaderData.profile;
   return (
-    <div className={`${pathname.startsWith("/auth") ? "p-0" :  "p-5 lg:p-20"}`}>
+    <div className={cn(
+      `${pathname.startsWith("/auth") ? "p-0" : "p-5 lg:p-20"}`,
+      isLoading && "transition-opacity animate-pulse")}>
       {pathname.startsWith("/auth") ? (
         <></>
       ) : (
-        <Navigation isLoggedIn={true} hasNotifications={true} hasMessages={true} />
+        <Navigation isLoggedIn={isLoggedIn}
+          hasNotifications={true}
+          hasMessages={true}
+          username={profile?.username}
+          name={profile?.name}
+          avatar={profile?.avatar}
+        />
       )}
       <main>
-        <Outlet />
+        <Outlet context={{ 
+          isLoggedIn,
+          name: profile?.name,
+          username: profile?.username,
+          avatar: profile?.avatar,
+          }}/>
       </main>
     </div>
   );
@@ -66,14 +97,24 @@ export default function App() {
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let message = "Oops!";
   let details = "An unexpected error occurred.";
+  let errorCode: string | undefined;
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
-    details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
+    // Handle custom error responses
+    if (error.data?.error_code && error.data?.message) {
+      errorCode = error.data.error_code;
+      message = errorCode || "Error";
+      details = error.data.message;
+    } else {
+      // Handle standard route errors
+      message = error.status === 404 ? "404" : "Error";
+      details =
+        error.status === 404
+          ? "The requested page could not be found."
+          : error.statusText || details;
+    }
+    console.log(error);
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
@@ -81,13 +122,18 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 
   return (
     <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
+      <div className="max-w-2xl mx-auto text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">{message}</h1>
+        <p className="text-lg text-gray-600 mb-8">{details}</p>
+        {errorCode && (
+          <p className="text-sm text-gray-500 mb-4">Error Code: {errorCode}</p>
+        )}
+        {import.meta.env.DEV && stack && (
+          <pre className="w-full p-4 overflow-x-auto bg-gray-100 rounded-lg text-left">
+            <code className="text-sm">{stack}</code>
+          </pre>
+        )}
+      </div>
     </main>
   );
 }

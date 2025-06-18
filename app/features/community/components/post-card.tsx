@@ -4,12 +4,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/common/components/ui/avat
 import { Link } from "react-router";
 import { ChevronUpIcon, DotIcon } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { DateTime } from "luxon";
 
 interface PostCardProps {
   id: string;
   title: string;
   author: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   category: string;
   postedAt: string;
   expanded?: boolean;
@@ -27,7 +28,7 @@ export function PostCard({
   upvotes = 0,
 }: PostCardProps) {
   return (
-    <Link to={`/community/${id}`} className="block">
+    <Link to={`/community/${id}`} className="block" key={id}>
       <Card className={cn("bg-transparent hover:bg-card/50 transition-colors", 
         expanded ? "flex flex-row items-center justify-between" : "")}>
         <CardHeader className="flex items-center gap-3 flex-1 min-w-0">
@@ -35,16 +36,16 @@ export function PostCard({
             {avatarUrl ? (
               <AvatarImage src={avatarUrl} />
             ) : (
-              <AvatarFallback>{author[0]}</AvatarFallback>
+              <AvatarFallback>{author.charAt(0).toUpperCase()}</AvatarFallback>
             )}
           </Avatar>
           <div className="space-y-2 w-0 flex-1 min-w-0">
             <CardTitle className="truncate">{title}</CardTitle>
             <div className="flex flex-row gap-1 text-sm leading-tight text-muted-foreground truncate">
-              <span className="">{author}</span>
+              <span className="">{author} on</span>
               <span className="">{category}</span>
               <DotIcon className="size-4" />
-              <span className="">{postedAt}</span>
+              <span className="">{DateTime.fromISO(postedAt).toRelative()}</span>
             </div>
           </div>
         </CardHeader>

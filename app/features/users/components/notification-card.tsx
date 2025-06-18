@@ -11,7 +11,6 @@ interface NotificationCardProps {
   action: string;
   timeAgo: string;
   seen?: boolean;
-  onMarkAsRead?: () => void;
 }
 
 export function NotificationCard({
@@ -21,7 +20,6 @@ export function NotificationCard({
   action,
   timeAgo,
   seen = false,
-  onMarkAsRead,
 }: NotificationCardProps) {
   return (
     <Card className={cn("min-w-[450px]", seen ? "" : "bg-yellow-500/60")}>
@@ -39,7 +37,7 @@ export function NotificationCard({
         </div>
       </CardHeader>
       <CardFooter className="flex justify-end">
-        <Button variant="outline" size="icon" onClick={onMarkAsRead}>
+        <Button variant="outline" size="icon">
           <EyeIcon className="size-4" />
         </Button>
       </CardFooter>

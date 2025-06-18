@@ -10,7 +10,7 @@ export function meta() {
 ``
 export default function AuthLayout() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 h-screen">
+    <div className="grid grid-cols-1 lg:grid-cols-2">
       <div className="hidden lg:block">
         <FlickeringGrid
           gridGap={5}
@@ -20,7 +20,6 @@ export default function AuthLayout() {
         />
       </div>
       <Outlet />
-
     </div>
   );
 } 

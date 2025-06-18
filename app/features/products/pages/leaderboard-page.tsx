@@ -3,6 +3,9 @@ import type { Route } from "./+types/leaderboard-page";
 import { Hero } from "~/common/components/hero";
 import { ProductCard } from "../components/product-card";
 import { Link } from "react-router";
+import { DateTime } from "luxon";
+import { getProductsByDateRange } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: Route.MetaFunction = () => {
   return [
@@ -11,14 +14,46 @@ export const meta: Route.MetaFunction = () => {
   ];
 };
 
-export default function LeaderboardPage() {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+  const {client, headers} = makeSSRClient(request);
+  const [dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts] = await Promise.all([  
+    getProductsByDateRange(client, {
+      startDate: DateTime.now().startOf("day"),
+      endDate: DateTime.now().endOf("day"),
+      limit: 7
+    }),
+    getProductsByDateRange(client, {
+      startDate: DateTime.now().startOf("week"),
+      endDate: DateTime.now().endOf("week"),
+      limit: 7
+    }),
+    getProductsByDateRange(client, {
+      startDate: DateTime.now().startOf("month"),
+      endDate: DateTime.now().endOf("month"),
+      limit: 7
+    }),
+    getProductsByDateRange(client, {
+      startDate: DateTime.now().startOf("year"),
+      endDate: DateTime.now().endOf("year"),
+      limit: 7
+    })
+  ]);
+  return {
+    dailyProducts,
+    weeklyProducts,
+    monthlyProducts,
+    yearlyProducts
+  };
+}
+
+export default function LeaderboardPage({ loaderData }: Route.ComponentProps) {
   return (
     <div className="space-y-16">
       <Hero
         title="Leaderboard"
         description="The most popular products on WeMake"
       />
-      
+
       {/* Daily Leaderboard */}
       <div className="grid grid-cols-3 gap-5">
         <div>
@@ -26,20 +61,17 @@ export default function LeaderboardPage() {
           <p className="text-lg font-light text-foreground">
             The most popular products on WeMake today
           </p>
-          <Button variant="link" asChild className="text-md p-0">
-            <Link to="/products/leaderboards/daily">Explore All Products &rarr;</Link>  
-          </Button>
         </div>
 
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.dailyProducts.map((product, index) => (
           <ProductCard
-            key={`daily-${index}`}
-            id={`daily-${index}`}
-            name={`Product Name ${index}`}
-            description={`Product Description ${index}`}
-            commentsCount={12}
-            viewsCount={34}
-            upvotes={120}
+            key={product.product_id}
+            id={product.product_id.toString()}
+            name={product.name}
+            description={product.tagline}
+            commentsCount={Number(product.reviews)}
+            viewsCount={Number(product.views)}
+            upvotes={Number(product.upvotes)}
           />
         ))}
         <Button variant="link" asChild className="text-md self-center">
@@ -54,20 +86,17 @@ export default function LeaderboardPage() {
           <p className="text-lg font-light text-foreground">
             The most popular products this week
           </p>
-          <Button variant="link" asChild className="text-md p-0">
-            <Link to="/products/leaderboards/weekly">Explore All Products &rarr;</Link>  
-          </Button>
         </div>
 
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.weeklyProducts.map((product, index) => (
           <ProductCard
-            key={`weekly-${index}`}
-            id={`weekly-${index}`}
-            name={`Product Name ${index}`}
-            description={`Product Description ${index}`}
-            commentsCount={24}
-            viewsCount={68}
-            upvotes={240}
+            key={product.product_id}
+            id={product.product_id.toString()}
+            name={product.name}
+            description={product.tagline}
+            commentsCount={Number(product.reviews)}
+            viewsCount={Number(product.views)}
+            upvotes={Number(product.upvotes)}
           />
         ))}
         <Button variant="link" asChild className="text-md self-center">
@@ -82,20 +111,17 @@ export default function LeaderboardPage() {
           <p className="text-lg font-light text-foreground">
             The most popular products this month
           </p>
-          <Button variant="link" asChild className="text-md p-0">
-            <Link to="/products/leaderboards/monthly">Explore All Products &rarr;</Link>  
-          </Button>
         </div>
 
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.monthlyProducts.map((product, index) => (
           <ProductCard
-            key={`monthly-${index}`}
-            id={`monthly-${index}`}
-            name={`Product Name ${index}`}
-            description={`Product Description ${index}`}
-            commentsCount={48}
-            viewsCount={136}
-            upvotes={480}
+            key={product.product_id}
+            id={product.product_id.toString()}
+            name={product.name}
+            description={product.tagline}
+            commentsCount={Number(product.reviews)}
+            viewsCount={Number(product.views)}
+            upvotes={Number(product.upvotes)}
           />
         ))}
         <Button variant="link" asChild className="text-md self-center">
@@ -110,20 +136,17 @@ export default function LeaderboardPage() {
           <p className="text-lg font-light text-foreground">
             The most popular products this year
           </p>
-          <Button variant="link" asChild className="text-md p-0">
-            <Link to="/products/leaderboards/yearly">Explore All Products &rarr;</Link>  
-          </Button>
         </div>
 
-        {Array.from({ length: 10 }).map((_, index) => (
+        {loaderData.yearlyProducts.map((product, index) => (
           <ProductCard
-            key={`yearly-${index}`}
-            id={`yearly-${index}`}
-            name={`Product Name ${index}`}
-            description={`Product Description ${index}`}
-            commentsCount={96}
-            viewsCount={272}
-            upvotes={960}
+            key={product.product_id}
+            id={product.product_id.toString()}
+            name={product.name}
+            description={product.tagline}
+            commentsCount={Number(product.reviews)}
+            viewsCount={Number(product.views)}
+            upvotes={Number(product.upvotes)}
           />
         ))}
         <Button variant="link" asChild className="text-md self-center">

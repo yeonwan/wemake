@@ -1,5 +1,5 @@
 import { Hero } from "~/common/components/hero";
-import type { Route } from "./+types/submit-page";
+import type { Route } from "./+types/submit-product-page";
 import { Form } from "react-router";
 import { InputPair } from "~/common/components/input-pair";
 import SelectPair from "~/common/components/select-pair";
@@ -84,7 +84,6 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
         </div>
 
         <div className="flex flex-col space-y-2">
-
           <Label className="flex flex-col gap-1 items-start">
             Icon{" "}
             <small className="text-muted-foreground">
@@ -100,7 +99,6 @@ export default function SubmitPage({ actionData }: Route.ComponentProps) {
             <span className="text-muted-foreground">Allowed formats : PNG, JPG, SVG</span>
             <span className="text-muted-foreground">Max file size : 1MB</span>
           </div>
-
         </div>
       </Form>
     </div>

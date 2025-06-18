@@ -1,12 +1,13 @@
-import { Form } from "react-router";
+import { Form, redirect, useNavigation } from "react-router";
 import { Button } from "~/common/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/common/components/ui/card";
-import { Input } from "~/common/components/ui/input";
-import { Label } from "~/common/components/ui/label";
-import { Icons } from "~/common/components/ui/icons";
 import { Link } from "react-router";
 import { InputPair } from "~/common/components/input-pair";
 import AuthButton from "../components/auth-button";
+import { makeSSRClient } from "~/supa-client";
+import type { Route } from "./+types/join-page";
+import { z } from "zod";
+import { checkUsernameExists } from "../qureries";
+import { Loader2 } from "lucide-react";
 
 export function meta() {
   return [
@@ -15,19 +16,65 @@ export function meta() {
   ];
 }
 
-export default function JoinPage() {
+const formSchema = z.object({
+  name: z.string().min(3),
+  username: z.string().min(3),
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
+export const action = async ({ request }: Route.ActionArgs) => {
+  const { client, headers } = makeSSRClient(request);
+  const formData = await request.formData();
+  const { success, data, error } = formSchema.safeParse(Object.fromEntries(formData));
+  if (!success) {
+    return {
+      formErrors: error.flatten().fieldErrors,
+      signUpError: null,
+    };
+  }
+  const { email, password, name, username } = data;
+  const exists = await checkUsernameExists(client, { username });
+  if (exists) {
+    return {
+      formErrors: "Username alreday exists",           
+      signUpError: null
+    };
+  }
+  const { error: signUpError } = await client.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        name: name,
+        username: username,
+      },
+    },
+  });
+  if (signUpError) {
+    return {
+      formErrors: null,
+      signUpError: signUpError.message
+    };
+  }
+  return redirect("/", { headers });
+}
+
+export default function JoinPage({ actionData }: Route.ComponentProps) {
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === "submitting" || navigation.state === "loading";
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen p-8">
       <Button variant="ghost" asChild className="absolute top-8 right-8">
         <Link to="/auth/login">
           Login
         </Link>
       </Button>
-      <div className="flex flex-col items-center justify-between w-full max-w-md gap-10">
+      <div className="flex flex-col items-center justify-between w-full max-w-md gap-10 mt-24">
         <h1 className="text-2xl font-semibold">Create an account</h1>
-        <Form className="w-full space-y-4">
+        <Form className="w-full space-y-4" method="post">
           <InputPair
-            id="name" 
+            id="name"
             label="Name"
             description="Enter your name"
             name="name"
@@ -37,6 +84,7 @@ export default function JoinPage() {
             autoCapitalize="none"
             autoComplete="name"
             autoCorrect="off" />
+          
           <InputPair
             id="username"
             label="Username"
@@ -59,6 +107,7 @@ export default function JoinPage() {
             autoCapitalize="none"
             autoComplete="email"
             autoCorrect="off" />
+
           <InputPair
             id="password"
             label="Password"
@@ -70,7 +119,14 @@ export default function JoinPage() {
             autoCapitalize="none"
             autoComplete="password"
             autoCorrect="off" />
-          <Button className="w-full" type="submit">Create account</Button>
+ 
+          <Button className="w-full"
+            type="submit"
+            disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
+          </Button>
+          {actionData?.signUpError &&
+            <p className="text-sm text-red-500">{actionData.signUpError}</p>}
         </Form>
         <AuthButton />
       </div>

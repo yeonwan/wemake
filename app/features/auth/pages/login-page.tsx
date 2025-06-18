@@ -1,12 +1,14 @@
-import { Form } from "react-router";
+import { Form, redirect, useNavigation } from "react-router";
 import { Button } from "~/common/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/common/components/ui/card";
-import { Input } from "~/common/components/ui/input";
-import { Label } from "~/common/components/ui/label";
-import { Icons } from "~/common/components/ui/icons";
 import { Link } from "react-router";
 import { InputPair } from "~/common/components/input-pair";
 import AuthButton from "../components/auth-button";
+import type { Route } from "./+types/login-page";
+import { AlertCircleIcon, Loader2 } from "lucide-react";
+import { z } from "zod";
+import { makeSSRClient } from "~/supa-client";
+import { Alert, AlertDescription, AlertTitle } from "~/common/components/ui/alert";
+import { LoadingButton } from "~/features/auth/components/loading-button";
 
 export function meta() {
   return [
@@ -15,9 +17,48 @@ export function meta() {
   ];
 }
 
-export default function LoginPage() {
+const loginSchema = z.object({
+  email: z.string({
+    required_error: "Email is required"
+  }).email({
+    message: "Invalid email address"
+  }),
+  password: z.string({
+    required_error: "Password is required"
+  }).min(8, {
+    message: "Password must be at least 8 characters long"
+  }),
+});
+
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const { success, data, error } = loginSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!success) {
+    return {
+      formErrors: error.flatten().fieldErrors,
+      loginError: null,
+    };
+  }
+  const { email, password } = data;
+  const { client, headers } = makeSSRClient(request);
+  const { error: loginError } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (loginError) {
+    return {
+      formErrors: null,
+      loginError: loginError.message,
+    };
+  }
+  return redirect("/", { headers });
+}
+
+export default function LoginPage({ actionData }: Route.ComponentProps) {
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === "submitting" || navigation.state === "loading";
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen p-8">
       <Button variant="ghost" asChild className="absolute top-8 right-8">
         <Link to="/auth/join">
           Create an account
@@ -25,9 +66,9 @@ export default function LoginPage() {
       </Button>
       <div className="flex flex-col items-center justify-between w-full max-w-md gap-10">
         <h1 className="text-2xl font-semibold">Login to your account</h1>
-        <Form className="w-full space-y-4">
+        <Form className="w-full space-y-4" method="post">
           <InputPair
-            id="email" 
+            id="email"
             label="Email"
             description="Enter your email"
             name="email"
@@ -37,6 +78,8 @@ export default function LoginPage() {
             autoCapitalize="none"
             autoComplete="email"
             autoCorrect="off" />
+          {actionData?.formErrors?.email &&
+            <p className="text-sm text-red-500">{actionData.formErrors.email?.join(", ")}</p>}
           <InputPair
             id="password"
             label="Password"
@@ -48,7 +91,20 @@ export default function LoginPage() {
             autoCapitalize="none"
             autoComplete="password"
             autoCorrect="off" />
-          <Button className="w-full" type="submit">Login</Button>
+          {actionData?.formErrors?.password &&
+            <p className="text-sm text-red-500">{actionData.formErrors.password?.join(", ")}</p>}
+          <LoadingButton 
+            className="w-full" 
+            type="submit" 
+            isLoading={isSubmitting}
+          > 
+            Login
+          </LoadingButton>
+          {actionData?.loginError &&
+           <Alert variant="destructive">
+              <AlertCircleIcon />
+              <AlertTitle>Unable to login. Please check your email and password.</AlertTitle>
+            </Alert>}
         </Form>
         <AuthButton />
       </div>

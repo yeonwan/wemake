@@ -1,18 +1,39 @@
 import { Button } from "~/common/components/ui/button";
-import { Card, CardContent, CardHeader } from "~/common/components/ui/card";
-import { Hero } from "~/common/components/hero";
 import { Badge } from "~/common/components/ui/badge";
 import { DotIcon } from "lucide-react";
+import { useState } from "react";
+import type { Route } from "./+types/job-page";
+import { getJobById } from "../queries";
+import { DateTime } from "luxon";
+import { makeSSRClient } from "~/supa-client";
 
-
-export function meta() {
+export const meta: Route.MetaFunction = ({ data }) => {
   return [
-    { title: "Job Details | WeMake" },
-    { name: "description", content: "View job details and apply" },
+    { title: `${data.job.position} | WeMake` },
+    { name: "description", content: data.job.overview },
   ];
 }
 
-export default function JobPage() {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const {client, headers} = makeSSRClient(request);
+  const job = await getJobById(client, { jobId: Number(params.jobId) });
+  return { job };
+}
+
+export default function JobPage({ loaderData }: Route.ComponentProps) {
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const job = loaderData.job;
+
+  const toggleFilter = (filter: string) => {
+    setSelectedFilters(prev => 
+      prev.includes(filter) 
+        ? prev.filter(f => f !== filter) // Remove if already selected
+        : [...prev, filter] // Add if not selected
+    );
+  };
+
+  const isFilterSelected = (filter: string) => selectedFilters.includes(filter);
+
   return (
     <div>
       <div className="bg-gradient-to-tr from-primary/80 to-primary/10 h-60 w-full rounded-lg"></div>
@@ -20,56 +41,67 @@ export default function JobPage() {
         <div className="col-span-4 space-y-10">
           <div className="-mt-20 object-cover overflow-hidden">
             <img
-              src="https://github.com/facebook.png"
+              src={job.company_logo_url}
               alt="company logo"
               className="size-40 rounded-full bg-white relative left-10" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Software Engineer</h1>
+            <h1 className="text-2xl font-bold">{job.position}</h1>
             <h4 className="text-sm text-muted-foreground">
-              Meta Inc.
+              {job.company_name}
             </h4>
           </div>
           <div className="flex gap-2">
-            <Badge variant="secondary">Full-time</Badge>
-            <Badge variant="secondary">Remote</Badge>
+            <Badge 
+              variant={isFilterSelected("Full-time") ? "default" : "secondary"}
+              className="cursor-pointer hover:opacity-80"
+              onClick={() => toggleFilter("Full-time")}
+            >
+              Full-time
+            </Badge>
+            <Badge 
+              variant={isFilterSelected("Remote") ? "default" : "secondary"}
+              className="cursor-pointer hover:opacity-80"
+              onClick={() => toggleFilter("Remote")}
+            >
+              Remote
+            </Badge>
           </div>
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Overview</h4>
             <p className="text-lg text-muted-foreground">
-              We are looking for a software engineer with a passion for building
-              scalable and efficient systems.
+              {job.overview}
             </p>
           </div>
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Responsibilities</h4>
             <ul className="text-lg list-disc list-inside ">
-              {["Desgin and implement scalable systems", "Collaborate with other engineers to build new features", "Optimize performance and maintainability  "].map((item) => (
-                <li key={item}>{item}</li>
+              {job.responsibilities.split(",").map((item, index) => (
+                <li className="capitalize" key={index}>{item}</li>
               ))}
             </ul>
           </div>
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Qualifications</h4>
             <ul className="text-lg list-disc list-inside ">
-              {["Bachelor's degree in Computer Science", "3+ years of experience in software development", "Strong understanding of object-oriented programming and design patterns"].map((item) => (
-                <li key={item}>{item}</li>
+              {job.qualifications.split(",").map((item, index) => (
+                <li className="capitalize" key={index}>{item}</li>
               ))}
             </ul>
           </div>
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Skills</h4>
             <ul className="text-lg list-disc list-inside ">
-              {["React", "Node.js", "Typescript", "Docker", "Kubernetes"].map((item) => (
-                <li key={item}>{item}</li>
+              {job.skills.split(",").map((item, index) => (
+                <li className="capitalize" key={item}>{item}</li>
               ))}
             </ul>
           </div>
           <div className="space-y-2.5">
             <h4 className="text-2xl font-bold">Benefits</h4>
             <ul className="text-lg list-disc list-inside ">
-              {["Healthcare", "Dental", "Vision", "401k", "PTO"].map((item) => (
-                <li key={item}>{item}</li>
+              {job.benefits.split(",").map((item, index) => (
+                <li className="capitalize" key={item}>{item}</li>
               ))}
             </ul>
           </div>
@@ -77,18 +109,18 @@ export default function JobPage() {
         <div className="col-span-2 sticky top-20 border rounded-xl mt-32 space-y-5 p-6">
           <div className="flex flex-col gap-2">
             <span className="text-sm text-muted-foreground">Avg. salary</span>
-            <span className="text-2xl font-medium"> $100,000 - $120,000 </span>
+            <span className="text-2xl font-medium"> {job.salary_range} </span>
           </div>
           <div className="flex flex-col gap-2">
             <span className="text-sm text-muted-foreground">Location</span>
-            <span className="text-2xl font-medium"> Remote </span>
+            <span className="text-2xl font-medium capitalize"> {job.location} </span>
           </div>
           <div className="flex flex-col gap-2">
             <span className="text-sm text-muted-foreground">Employment type</span>
-            <span className="text-2xl font-medium"> Full-time </span>
+            <span className="text-2xl font-medium capitalize"> {job.job_type} </span>
           </div>
           <div className="flex gap-1">
-            <span className="text-sm text-muted-foreground"> Posted 2 days ago </span>
+            <span className="text-sm text-muted-foreground"> Posted {DateTime.fromISO(job.created_at).toRelative()} </span>
             <DotIcon className="size-4" />
             <span className="text-sm text-muted-foreground">395 views</span>
           </div>

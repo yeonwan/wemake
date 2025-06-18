@@ -5,6 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/common/components/ui/avat
 import { Badge } from "~/common/components/ui/badge";
 import { Button } from "~/common/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/common/components/ui/card";
+import type { Route } from "./+types/team-page";
+import { getTeamById } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: MetaFunction = ({ params }) => {
   return [
@@ -13,11 +16,19 @@ export const meta: MetaFunction = ({ params }) => {
   ];
 };
 
-export default function TeamPage() {
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const {client, headers} = makeSSRClient(request);
+  const team = await getTeamById(client, { teamId: Number(params.teamId) });
+  return { team };
+}
+
+export default function TeamPage({ loaderData }: Route.ComponentProps) {
+  const team = loaderData.team;
+  const leader = loaderData.team.team_leader;
   return (
     <div className="container py-8">
       <Hero
-        title="Join Yeonwan's Team"
+        title={`Join ${leader.name}'s Team`}
         description="View team details and join the team"
       />
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-12 gap-8 items-start">
@@ -25,19 +36,19 @@ export default function TeamPage() {
           {[
             {
               title: "Product name",
-              value: "Doggie social"
+              value: team.product_name
             },
             {
               title: "Stage",
-              value: "MVP"
+              value: team.product_stage
             },
             {
               title: "Team size",
-              value: "10"
+              value: team.team_size
             },
             {
               title: "Available equity",
-              value: "10%"
+              value: team.equity_split
             },
           ].map((item) => (
             <Card key={item.title}>
@@ -58,7 +69,7 @@ export default function TeamPage() {
               </CardTitle>
               <CardContent className="font-semibold text-xl">
                 <ul className="text-lg list-disc list-inside">
-                  {["React Developer", "UI/UX Designer", "Full Stack Developer", "iOS Developer", "Android Developer", "Product Manager", "Business Analyst", "Marketing Specialist", "Sales Manager", "Customer Success Manager"].map((item) => (
+                  {team.roles.split(",").map((item) => (
                     <li key={item}>
                       {item}
                     </li>
@@ -73,7 +84,7 @@ export default function TeamPage() {
                 Description
               </CardTitle>
               <CardContent className="font-medium text-xl">
-                <p>We are a team of 10 people who are passionate about building a product that helps people connect with each other.</p>
+                <p>{team.description}</p>
               </CardContent>
             </CardHeader>
           </Card>
@@ -82,12 +93,11 @@ export default function TeamPage() {
         <aside className="col-span-1 md:col-span-1 lg:col-span-4 border rounded-lg shadow-sm space-y-6 p-8">
           <div className="flex flex-row gap-5">
             <Avatar className="size-14">
-              <AvatarImage src="https://github.com/yeonwan.png" />
-              <AvatarFallback>N</AvatarFallback>
+              {leader.avatar == null ? <AvatarFallback>{leader.name.charAt(0)} </AvatarFallback> : <AvatarImage src={leader.avatar} />}
             </Avatar>
             <div className="flex flex-col">
-              <h4 className="text-lg font-medium">Yeonwan</h4>
-              <Badge variant="secondary">Entrepreneur</Badge>
+              <h4 className="text-lg font-medium">{leader.name}</h4>
+              <Badge variant="secondary">{leader.role}</Badge>
             </div>
           </div>
 

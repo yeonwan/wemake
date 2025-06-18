@@ -65,8 +65,8 @@ const menus = [
                 description: "Find a internships in our community",
                 to: "/jobs?type=internship"
             }, {
-                name: "Submit a Job",
-                description: "Submit a new job to our community",
+                name: "Post a Job",
+                description: "Post a new job to our community",
                 to: "/jobs/submit"
             }
         ]
@@ -123,8 +123,8 @@ const menus = [
     }
 ]
 
-export function Navigation({ isLoggedIn, hasNotifications, hasMessages }:
-    { isLoggedIn: boolean, hasNotifications: boolean, hasMessages: boolean }) {
+export function Navigation({ isLoggedIn, hasNotifications, hasMessages, username, name, avatar }:
+    { isLoggedIn: boolean, hasNotifications: boolean, hasMessages: boolean, username?: string, name?: string, avatar?: string | null }) {
     return (
         <nav className="flex px-20 h-16 items-center justify-between backdrop-blur fixed top-0 left-0 right-0 z-50 bg-background/50">
             <div className="flex items-center gap-4">
@@ -180,16 +180,16 @@ export function Navigation({ isLoggedIn, hasNotifications, hasMessages }:
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger>
-                            <Avatar>
-                                <AvatarImage src="https://github.com/shadcn.png" />
-                                <AvatarFallback>CN</AvatarFallback>
+                            <Avatar className="cursor-pointer">
+                                {avatar !== null && <AvatarImage src={avatar} />}
+                                {avatar === null && <AvatarFallback>{name?.charAt(0) || "U"}</AvatarFallback>}
                             </Avatar>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56">
                             <DropdownMenuLabel className="flex flex-col gap-1">
-                                <span className="font-medium">John Doe</span>
+                                <span className="font-medium">{name}</span>
                                 <span className="text-xs text-muted-foreground">
-                                    @username
+                                    @{username}
                                 </span>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
@@ -213,7 +213,7 @@ export function Navigation({ isLoggedIn, hasNotifications, hasMessages }:
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
-                                    <Link to="/logout">
+                                    <Link to="/auth/logout">
                                         <LogOutIcon className="size-4 mr-2" />
                                         Logout
                                     </Link>
@@ -229,7 +229,7 @@ export function Navigation({ isLoggedIn, hasNotifications, hasMessages }:
                         <Link to="/auth/login">Login</Link>
                     </Button>
                     <Button variant="default" asChild>
-                        <Link to="/auth/signup">Sign Up</Link>
+                        <Link to="/auth/join">Sign Up</Link>
                     </Button>
                 </div>}
         </nav>

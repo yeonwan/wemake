@@ -1,5 +1,8 @@
-import { useParams } from "react-router";
+import { redirect, useParams } from "react-router";
+import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/common/components/ui/card";
+import type { Route } from "./+types/social-complete-page";
+import { makeSSRClient } from "~/supa-client";
 
 export function meta() {
   return [
@@ -8,20 +11,26 @@ export function meta() {
   ];
 }
 
-export default function SocialCompletePage() {
-  const { provider } = useParams();
+const paramsSchema = z.object({
+  provider: z.enum(["kakao", "github"]),
+}); 
 
-  return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Almost there...</CardTitle>
-        <CardDescription>
-          Completing authentication with {provider}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </CardContent>
-    </Card>
-  );
-} 
+export const loader = async ({params, request}: Route.LoaderArgs) => {
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code");
+  if (!code) {
+    return redirect("/auth/login");
+  }
+  const { success, data } = paramsSchema.safeParse(params);
+  if (!success) {
+    return redirect("/auth/login");
+  }
+
+  const { client, headers } = makeSSRClient(request);
+  const { error } = await client.auth.exchangeCodeForSession(code);
+  if (error) {
+    throw error;
+  }
+  return redirect("/", { headers });
+  
+};

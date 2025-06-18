@@ -8,5 +8,5 @@ export const PERIOD_OPTIONS = [
   { label: "Year", value: "year" },
   { label: "Month", value: "month" },
   { label: "Week", value: "week" },
-  { label: "Day", value: "day" },
+  { label: "Day", value: "today" },
 ];
